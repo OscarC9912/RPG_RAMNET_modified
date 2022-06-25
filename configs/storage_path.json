@@ -1,0 +1,5 @@
+{
+    "depth_data": "/h/sankeert/zhonghan_chen/dataset/train/full/town1_1/depth/data",
+    "rgb_data": "/h/sankeert/zhonghan_chen/dataset/train/full/town1_1/rgb/data",
+    "dvs_voxel": "/h/sankeert/zhonghan_chen/dataset/train/full/town1_1/events/voxels"
+}
