@@ -1,3 +1,5 @@
 __pycache__/
 *.out
 temp/
+config.json
+save_dir/
