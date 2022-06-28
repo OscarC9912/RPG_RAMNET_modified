@@ -14,6 +14,7 @@ from trainer.lstm_trainer import LSTMTrainer
 from utils.data_augmentation import Compose, RandomRotationFlip, RandomCrop, CenterCrop
 from os.path import join
 import bisect
+import shutil
 
 from SFTP_Solver.copier import SFTP_copier
 from SFTP_Solver.dataLoader import dataLoader
@@ -290,7 +291,14 @@ if __name__ == '__main__':
         config = json.load(open(args.config))
         path = os.path.join(config['trainer']['save_dir'], config['name'])
         if args.resume is None:
-            assert not os.path.exists(path), "Path {} already exists!".format(path)
+
+            # I make some modification here to ensure the save dir does not exist
+            if os.path.exists(path):
+                shutil.rmtree(path)
+            # Modification is done here
+            
+            assert not os.path.exists(path),"Path {} already exists!".format(path)
+    
     assert config is not None
 
     main(config, args.resume, args.initial_checkpoint)
