@@ -52,8 +52,6 @@ def concatenate_subfolders(base_folder, dataset_type, event_folder, depth_folder
     # Here is modified
     sftp = SFTP_copier.get_instance().sftp
     subfolders = sftp.listdir(base_folder)
-
-    print("Here will be executed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     # Modification is done
 
     """

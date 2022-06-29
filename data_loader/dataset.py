@@ -264,10 +264,8 @@ class SynchronizedFramesEventsDataset(Dataset):
 
     def __getitem__(self, i, seed=None):
         #def __getitem__(self, i, seed=None, reg_factor=5.70378): 
-        print('in getitem', self.loader)
         if self.loader is None:
             self.init_sftp()
-        print('after init_sftp')
 
         reg_factor = self.reg_factor
         assert(i >= 0)

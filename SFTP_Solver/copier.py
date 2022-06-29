@@ -53,8 +53,6 @@ class SFTP_copier:
         localpath_alreadyFILE: true iff local path contains file name
         """
 
-        print('in data retriever')
-
         if localpath_alreadyFILE:  # the case when local_path contains file name
             self.sftp.get(remote_path, local_path, callback=None, prefetch=False)
         else:
