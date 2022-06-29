@@ -1,5 +1,5 @@
 {
-    "depth_data": "/home/melonlord/RPG_RAMNET_modified/temp",
-    "rgb_data": "/home/melonlord/RPG_RAMNET_modified/temp",
-    "dvs_voxel": "/home/melonlord/RPG_RAMNET_modified/temp"
+    "depth_data": "temp",
+    "rgb_data": "temp",
+    "dvs_voxel": "temp"
 }
