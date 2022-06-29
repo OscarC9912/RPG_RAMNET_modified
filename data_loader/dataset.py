@@ -130,7 +130,6 @@ class SequenceSynchronizedFramesEventsDataset(Dataset):
                 # normal case: append the next item to the list
                 k += 1
                 item = self.dataset.__getitem__(j + k, seed)
-                print(item)
                 sequence.append(item)
 
         # down sample data
