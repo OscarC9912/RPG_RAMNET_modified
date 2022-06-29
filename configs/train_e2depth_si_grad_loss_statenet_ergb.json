@@ -67,7 +67,7 @@
     "trainer": {
         "epochs": 201,
         "sequence_length": 10,
-        "save_dir": "RPG_RAMNET_modified/save_dir/e2depth_checkpoints/",
+        "save_dir": "save_dir/e2depth_checkpoints/",
         "save_freq": 4,
         "verbosity": 2,
         "monitor": "val_loss",
