@@ -10,5 +10,5 @@ from SFTP_Solver.dataLoader import dataLoader
 #         load = dataLoader(copier)
 #         self.loader = load
 
-copier = SFTP_copier()
-loader = dataLoader(copier)
+# copier = SFTP_copier()
+# loader = dataLoader(copier)

@@ -36,7 +36,7 @@
             "baseline": false
         },
         "batch_size": 2,
-        "num_workers": 2,
+        "num_workers": 0,
         "pin_memory": false,
         "normalize": true,
         "shuffle": true
@@ -67,7 +67,7 @@
     "trainer": {
         "epochs": 201,
         "sequence_length": 10,
-        "save_dir": "/home/melonlord/RPG_RAMNET_modified/save_dir/e2depth_checkpoints/",
+        "save_dir": "RPG_RAMNET_modified/save_dir/e2depth_checkpoints/",
         "save_freq": 4,
         "verbosity": 2,
         "monitor": "val_loss",

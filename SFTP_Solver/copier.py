@@ -11,11 +11,18 @@ class SFTP_copier:
     SFTP_copier Class contains function transferring files between ssh server
     """
 
+    # ref = False
+    instance = None
+    @staticmethod
+    def get_instance():
+        if SFTP_copier.instance is None:
+            SFTP_copier.instance = SFTP_copier()
+        return SFTP_copier.instance
+
     def __init__(self) -> None:
         """
         Initialize the object, so that we are able to use add function to it.
         """
-
         # connect to the cslab server first
         conn_lab = paramiko.SSHClient()
         conn_lab.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -33,9 +40,8 @@ class SFTP_copier:
         mel.connect('mel-15', port=22, username='chen', sock=labchannel, timeout=700)
 
         # set up an SFTP client object
-        sfpt_obj = mel.open_sftp()
+        self.sftp = mel.open_sftp()
 
-        self.sftp = sfpt_obj
 
 
     def data_retriver(self, remote_path: str, local_path: str, localpath_alreadyFILE: bool) -> str:
@@ -46,12 +52,14 @@ class SFTP_copier:
         local_path: the file path / the directory path in local machine
         localpath_alreadyFILE: true iff local path contains file name
         """
-        
+
+        print('in data retriever')
+
         if localpath_alreadyFILE:  # the case when local_path contains file name
-            self.sftp.get(remote_path, local_path, callback=None, prefetch=True)
+            self.sftp.get(remote_path, local_path, callback=None, prefetch=False)
         else:
             local_file_path = self._path_generator(remote_path, local_path)
-            self.sftp.get(remote_path, local_file_path, callback=None, prefetch=True)
+            self.sftp.get(remote_path, local_file_path, callback=None, prefetch=False)
             return local_file_path
 
 

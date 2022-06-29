@@ -18,8 +18,8 @@ from torch.utils.data.dataloader import default_collate
 from math import fabs
 import json
 
-
-import SFTP_Solver.connector as connector
+from SFTP_Solver.copier import SFTP_copier
+from SFTP_Solver.dataLoader import dataLoader
 
 
 
@@ -89,7 +89,7 @@ class SynchronizedFramesEventsRawDataset(Dataset):
 
         # length = total number of datapoints, not equal to length of final dataset due to every_x_rgb_frame & step size
         self.length = len(self.event_dataset)
-
+        self.loader = None
         # Check that the frame timestamps are unique and sorted
         assert(np.alltrue(np.diff(self.stamps) > 0)
                ), "frame timestamps are not unique and monotonically increasing"
@@ -100,24 +100,26 @@ class SynchronizedFramesEventsRawDataset(Dataset):
 
         self.nbr_events_per_frame = []
 
+
+
+    def init_sftp(self):
+
         storage = open("configs/storage_path.json")
         data = json.load(storage)
 
+        # Here I make some modification
+        copier = SFTP_copier.get_instance()
+        self.loader = dataLoader(copier)
 
-        self.loader = connector.loader
         self.local_dir = data["depth_data"]
         remote_dir = self.depth_folder
         format = '*_depth.npy'
         self.filepath = self.loader.list_dir(remote_dir, format)
-
-
       
         self.local_dir_rgb = data["rgb_data"]
         remote_dir = self.frame_folder
         format = '*_image.png'
         self.filepath_rgb = self.loader.list_dir(remote_dir, format)
-
-
 
 
     def __len__(self):
@@ -126,6 +128,10 @@ class SynchronizedFramesEventsRawDataset(Dataset):
     def __getitem__(self, i, seed=None, reg_factor=5.70378):
         assert(i >= 0)
         assert(i < (self.length // self.every_x_rgb_frame))
+
+        if self.loader is None:
+            self.init_sftp()
+
         item = {}
 
         def rgb2gray(rgb):

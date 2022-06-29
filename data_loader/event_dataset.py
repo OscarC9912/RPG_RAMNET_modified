@@ -13,7 +13,8 @@ import torch
 import glob
 import json
 
-import SFTP_Solver.connector as connector
+from SFTP_Solver.copier import SFTP_copier
+from SFTP_Solver.dataLoader import dataLoader
 
 
 class EventDataset(Dataset):
@@ -33,10 +34,13 @@ class EventDataset(Dataset):
         else:
             self.use_mvsec = False
 
+
         storage = open("configs/storage_path.json")
         data = json.load(storage)
 
-        self.loader = connector.loader
+        # Here I make some modification
+        copier = SFTP_copier.get_instance()
+        self.loader = dataLoader(copier)
 
         self.local_dir_stmp = data["dvs_voxel"]
         self.filepath_stmp = join(self.event_folder, 'timestamps.txt')
@@ -53,8 +57,6 @@ class EventDataset(Dataset):
 
         self.read_timestamps()
         self.parse_event_folder()
-
-        storage.close()
 
 
 
@@ -176,7 +178,7 @@ class VoxelGridDataset(EventDataset):
         else:
 
             # Here I make some modification
-            event_tensor = self.loader.rgbReader(self.filepath_dvs, self.local_dir_dvs)
+            event_tensor = self.loader.dvsLoader(self.filepath_dvs, self.local_dir_dvs)
             # copier.sftp.close()
             # modification done
 

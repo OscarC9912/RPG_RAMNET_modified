@@ -3,6 +3,8 @@
 Dataset classes
 """
 
+from curses import noecho
+from itertools import count
 from tempfile import tempdir
 from torch.utils.data import Dataset
 from .event_dataset import VoxelGridDataset, FrameDataset
@@ -19,9 +21,11 @@ import torch.nn.functional as f
 from math import fabs
 import cv2
 import matplotlib.pyplot as plt
+import os
 import json
 
-import SFTP_Solver.connector as connector
+from SFTP_Solver.copier import SFTP_copier
+from SFTP_Solver.dataLoader import dataLoader
 
 
 class SequenceSynchronizedFramesEventsDataset(Dataset):
@@ -126,6 +130,7 @@ class SequenceSynchronizedFramesEventsDataset(Dataset):
                 # normal case: append the next item to the list
                 k += 1
                 item = self.dataset.__getitem__(j + k, seed)
+                print(item)
                 sequence.append(item)
 
         # down sample data
@@ -147,23 +152,18 @@ class SequenceSynchronizedFramesEventsDataset(Dataset):
 
 class SynchronizedFramesEventsDataset(Dataset):
     """Loads time-synchronized event tensors and depth from a folder.
-
     This Dataset class iterates through all the event tensors and returns, for each tensor,
     a dictionary of the form:
-
         {'depth': frame, 'events': events, 'flow': disp_01, 'semantic': semantic}
-
     where:
-
     * depth is a H x W tensor containing the first frame whose timestamp >= event tensor
     * events is a C x H x W tensor containing the event data
     * flow is a 2 x H x W tensor containing the flow (displacement) from the current frame to the last frame
     * semantic is a 1 x H x W tensor containing the semantic labels 
-
     This loader assumes that each event tensor can be uniquely associated with a frame.
     For each event tensor with timestamp e_t, the corresponding frame is the first frame whose timestamp f_t >= e_t
-
     """
+
 
     def __init__(self, base_folder, event_folder, depth_folder='frames', frame_folder='rgb', flow_folder='flow', semantic_folder='semantic',
                  start_time=0.0, stop_time=0.0, clip_distance=100.0, every_x_rgb_frame=1,
@@ -206,39 +206,20 @@ class SynchronizedFramesEventsDataset(Dataset):
             self.use_mvsec = False
 
         
+        copier = SFTP_copier.get_instance()
+        loader = dataLoader(copier)
+
+        # # Here I make some modification
         storage = open("configs/storage_path.json")
         data = json.load(storage)
 
-        # Here I make some modification
-        self.loader = connector.loader
-
         local_dir_depth = data["depth_data"]
         remote_path_depth = join(self.depth_folder, 'timestamps.txt')
-        temp = self.loader.timestampLoader(remote_path_depth, local_dir_depth)
+        temp = loader.timestampLoader(remote_path_depth, local_dir_depth)
         self.stamps = temp[:, 1]
 
+        self.loader = loader
 
-
-        self.local_dir_loop = data["depth_data"]
-        remote_dir_loop = self.depth_folder
-        self.filepath_loop = self.loader.list_dir(remote_dir_loop, '*_depth.npy')
-
-
-        self.local_dir_rgb = data["rgb_data"]
-        self.filepath_rgb = self.loader.list_dir(self.frame_folder, '*_image.png')
-
-        self.filepath_rgb2 = self.loader.list_dir(self.frame_folder, '*_image.png')
-
-        storage.close()
-
-        # self.copier.sftp.close()
-        # Here modification is done
-
-        """
-        # Load the stamp files
-        self.stamps = np.loadtxt(
-            join(self.depth_folder, 'timestamps.txt'))[:, 1]
-        """
 
         if self.use_mvsec and not "javi" in self.base_folder:
             self.stamps = self.stamps[1:]
@@ -257,11 +238,37 @@ class SynchronizedFramesEventsDataset(Dataset):
         '''assert(
             self.stamps[-1] >= self.event_dataset.get_last_stamp())'''
 
+        with open("configs/storage_path.json") as storage:
+            data = json.load(storage)
+
+            self.local_dir_loop = data["depth_data"]
+            remote_dir_loop = self.depth_folder
+            self.filepath_loop = self.loader.list_dir(remote_dir_loop, '*_depth.npy')
+
+            self.local_dir_rgb = data["rgb_data"]
+            self.filepath_rgb = self.loader.list_dir(self.frame_folder, '*_image.png')
+
+            self.filepath_rgb2 = self.loader.list_dir(self.frame_folder, '*_image.png')
+
+
+    def init_sftp(self):
+
+        # Here I make some modification
+        copier = SFTP_copier.get_instance()
+        self.loader = dataLoader(copier)
+
+
+
     def __len__(self):
         return self.length
 
     def __getitem__(self, i, seed=None):
         #def __getitem__(self, i, seed=None, reg_factor=5.70378): 
+        print('in getitem', self.loader)
+        if self.loader is None:
+            self.init_sftp()
+        print('after init_sftp')
+
         reg_factor = self.reg_factor
         assert(i >= 0)
         assert(i < (self.length // self.every_x_rgb_frame))
@@ -272,7 +279,6 @@ class SynchronizedFramesEventsDataset(Dataset):
 
         def nan_helper(self, y):
             """Helper to handle indices and logical indices of NaNs.
-
             Input: 
                 - y, 1d numpy array with possible NaNs
             Output:
