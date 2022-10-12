@@ -26,10 +26,5 @@ Added storage_path.json, which specifies the local absolute path that temporily 
 
 The folder is a backup for the orginal data loaders of the project.
 
-<p align="center">
-    <img src="doc/event_scape_s01_preview_w.gif" alt="Video to Events" width="800"/>
-</p>
 
-<p align="center">
-<img src="doc/img/RAM_Net_preview.png" width="600">
-</p>
+[![name](https://github.com/uzh-rpg/rpg_ramnet/raw/master/doc/img/RAM_Net_preview.png)
